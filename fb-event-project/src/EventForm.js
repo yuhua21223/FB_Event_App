@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { createEvent, readEvent, updateEvent, deleteEvent } from './api';
+import { createEvent,readEvent, updateEvent, deleteEvent } from '../src/api';
+
 
 function EventForm() {
     // State for form fields and feedback to the user.
