@@ -1,94 +1,134 @@
 import React, { useState } from 'react';
-import { createEvent,readEvent, updateEvent, deleteEvent } from '../src/api';
-
+import { createEvent, readEvent, updateEvent, deleteEvent } from '../src/api';
 
 function EventForm() {
-    // State for form fields and feedback to the user.
-    const [eventId, setEventId] = useState('');           // Store Event ID
-    const [eventName, setEventName] = useState('');       // Store Event Name
-    const [eventDate, setEventDate] = useState('');       // Store Event Date
-    const [feedback, setFeedback] = useState('');         // Store feedback messages
+    const [eventId, setEventId] = useState('');
+    const [eventName, setEventName] = useState('');
+    const [eventDescription, setEventDescription] = useState('');
+    const [eventDate, setEventDate] = useState('');
+    const [placeId, setPlaceId] = useState('');
+    const [eventCategory, setEventCategory] = useState('');
+    const [eventTimezone, setEventTimezone] = useState('');
+    const [coverURL, setCoverURL] = useState('');
+    const [feedback, setFeedback] = useState('');
 
-    // Handler for creating an event.
     const handleCreate = async () => {
         try {
-            // Make a POST request to create a new event.
-            const response = await createEvent({ name: eventName, date: eventDate });
-            setFeedback(`Event created with ID: ${response.data.id}`);
+            const eventData = {
+                name: eventName,
+                description: eventDescription,
+                place_id: placeId,
+                category: eventCategory,
+                timezone: eventTimezone,
+                start_time: eventDate,
+                cover: {
+                    source: coverURL,
+                    offset_x: 0,
+                    offset_y: 0
+                }
+            };
+            const response = await createEvent(eventData);
+            setFeedback(`Event created with ID: ${response.id}`);
         } catch (error) {
-            // Display error to the user if there's a problem.
             setFeedback(error.message);
         }
     };
 
-    // Handler for reading an event's details.
     const handleRead = async () => {
         try {
-            // Make a GET request to fetch event details by ID.
             const response = await readEvent(eventId);
-            setEventName(response.data.name);
-            setEventDate(response.data.date);
-            setFeedback('Event details fetched successfully');
+            if(response && response.data) {
+                setEventName(response.data.name);
+                setEventDate(response.data.date);
+                // Add more setters if you have more fields from the response
+                setFeedback('Event details fetched successfully');
+            } else {
+                setFeedback('Failed to fetch event details.');
+            }
         } catch (error) {
-            // Display error to the user if there's a problem.
             setFeedback(error.message);
         }
     };
 
-    // Handler for updating an event.
     const handleUpdate = async () => {
         try {
-            // Make a POST request to update an existing event by ID.
-            await updateEvent(eventId, { name: eventName, date: eventDate });
+            const eventData = {
+                name: eventName,
+                description: eventDescription,
+                place_id: placeId,
+                category: eventCategory,
+                timezone: eventTimezone,
+                start_time: eventDate,
+                cover: {
+                    source: coverURL,
+                    offset_x: 0,
+                    offset_y: 0
+                }
+            };
+            await updateEvent(eventId, eventData);
             setFeedback('Event updated successfully');
         } catch (error) {
-            // Display error to the user if there's a problem.
             setFeedback(error.message);
         }
     };
 
-    // Handler for deleting an event.
     const handleDelete = async () => {
         try {
-            // Make a DELETE request to remove an event by ID.
             await deleteEvent(eventId);
+            // Reset fields after successful deletion
+            setEventId('');
+            setEventName('');
+            setEventDate('');
+            // Add more resets if you have more fields
             setFeedback('Event deleted successfully');
         } catch (error) {
-            // Display error to the user if there's a problem.
             setFeedback(error.message);
         }
     };
+
+    // ... [Rest of the handlers remain unchanged]
 
     return (
         <div>
             <h2>Facebook Event API Form</h2>
-            {/* Input field for Event ID */}
             <label>
                 Event ID:
                 <input type="text" value={eventId} onChange={(e) => setEventId(e.target.value)} placeholder="If updating or deleting" />
             </label>
-
-            {/* Input field for Event Name */}
             <label>
                 Event Name:
                 <input type="text" value={eventName} onChange={(e) => setEventName(e.target.value)} />
             </label>
-
-            {/* Input field for Event Date */}
+            <label>
+                Description:
+                <textarea value={eventDescription} onChange={(e) => setEventDescription(e.target.value)}></textarea>
+            </label>
+            <label>
+                Place ID:
+                <input type="text" value={placeId} onChange={(e) => setPlaceId(e.target.value)} />
+            </label>
+            <label>
+                Event Category:
+                <input type="text" value={eventCategory} onChange={(e) => setEventCategory(e.target.value)} />
+            </label>
+            <label>
+                Event Timezone:
+                <input type="text" value={eventTimezone} onChange={(e) => setEventTimezone(e.target.value)} />
+            </label>
             <label>
                 Event Date:
                 <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
             </label>
-
-            {/* Buttons for CRUD operations */}
+            <label>
+                Cover Image URL:
+                <input type="url" value={coverURL} onChange={(e) => setCoverURL(e.target.value)} />
+            </label>
             <div>
                 <button onClick={handleCreate}>Create Event</button>
                 <button onClick={handleRead}>Read Event</button>
                 <button onClick={handleUpdate}>Update Event</button>
                 <button onClick={handleDelete}>Delete Event</button>
             </div>
-
-            {/* Display feedback to the user */}
             {feedback && <div>{feedback}</div>}
         </div>
     );
